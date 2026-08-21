@@ -22,7 +22,7 @@ function seenKey() {
 const state = {
   data: null,
   query: "",
-  tab: "current",
+  tab: "all",
   monthKey: monthKey(),
   seenAt: "",
 };
@@ -55,20 +55,20 @@ function inCurrentMonth(person) {
   return Boolean(person.completedAt) && person.completedAt.slice(0, 7) === state.monthKey;
 }
 
-function monthPeople() {
-  return (state.data.people || []).filter(inCurrentMonth);
+function allPeople() {
+  return state.data.people || [];
 }
 
-function previousPeople() {
-  return (state.data.people || []).filter((person) => !inCurrentMonth(person));
+function monthPeople() {
+  return allPeople().filter(inCurrentMonth);
 }
 
 function activePeople() {
-  return state.tab === "previous" ? previousPeople() : monthPeople();
+  return state.tab === "current" ? monthPeople() : allPeople();
 }
 
 function isNew(person) {
-  if (state.tab !== "current" || !person.completedAt) {
+  if (!person.completedAt || !inCurrentMonth(person)) {
     return false;
   }
   if (!state.seenAt) {
@@ -116,11 +116,9 @@ function renderPeriod() {
 }
 
 function renderTabs() {
-  const currentCount = monthPeople().length;
-  const previousCount = previousPeople().length;
   const options = [
-    { id: "current", label: `Current month · ${currentCount}` },
-    { id: "previous", label: `Previous respondents · ${previousCount}` },
+    { id: "all", label: `All · ${allPeople().length}` },
+    { id: "current", label: `Current month · ${monthPeople().length}` },
   ];
   els.tabs.innerHTML = "";
   options.forEach((option) => {
@@ -141,46 +139,29 @@ function renderTabs() {
 
 function renderCopy() {
   const current = monthLabel();
-  if (state.tab === "previous") {
-    els.lede.textContent = `Everyone who completed the questionnaire before ${current}. Current-month responses stay on the Current month tab.`;
-    els.peopleHeading.textContent = "Previous respondents";
-    els.peopleCaption.textContent = "People who completed in earlier months, newest first.";
-    els.byDayCaption.textContent = "Completions by day before this month.";
-    els.recentCaption.textContent = "Most recent people from previous months.";
-    els.generated.textContent = `Previous months. ${state.data.meta.privacy}`;
+  if (state.tab === "current") {
+    els.lede.textContent = `Newsletter questionnaire respondents for ${current}. This tab resets on the first of each month.`;
+    els.peopleHeading.textContent = "Current month";
+    els.peopleCaption.textContent = `Name and completion status for ${current}. Newest submissions first.`;
+    els.byDayCaption.textContent = `Count of unique respondents by day in ${current}.`;
+    els.recentCaption.textContent = `Most recent people to complete the form in ${current}.`;
+    els.generated.textContent = `Showing ${current}. ${state.data.meta.privacy}`;
     return;
   }
-  els.lede.textContent = `Newsletter questionnaire respondents for ${current}. This tab resets on the first of each month.`;
-  els.peopleHeading.textContent = "Current month";
-  els.peopleCaption.textContent = `Name and completion status for ${current}. Newest submissions first.`;
-  els.byDayCaption.textContent = `Count of unique respondents by day in ${current}.`;
-  els.recentCaption.textContent = `Most recent people to complete the form in ${current}.`;
-  els.generated.textContent = `Showing ${current}. ${state.data.meta.privacy}`;
+  els.lede.textContent = `Every current and previous respondent from the form export. Use Current month to see only ${current}.`;
+  els.peopleHeading.textContent = "All respondents";
+  els.peopleCaption.textContent = "Current and previous completions, newest first.";
+  els.byDayCaption.textContent = "Completions by day across every month.";
+  els.recentCaption.textContent = "Most recent people to complete the form.";
+  els.generated.textContent = `All respondents. ${state.data.meta.privacy}`;
 }
 
 function renderKpis(rows) {
   const latest = latestIn(rows);
   const current = monthLabel();
   const cards =
-    state.tab === "previous"
+    state.tab === "current"
       ? [
-          {
-            label: "Previous respondents",
-            value: String(rows.length),
-            note: `Completed before ${current}`,
-          },
-          {
-            label: "Latest previous",
-            value: latest?.completedLabel || "—",
-            note: "Most recent completion before this month",
-          },
-          {
-            label: "Current month",
-            value: current,
-            note: `${monthPeople().length} on the Current month tab`,
-          },
-        ]
-      : [
           {
             label: "Completed",
             value: String(rows.filter((row) => row.completed).length),
@@ -195,6 +176,23 @@ function renderKpis(rows) {
             label: "Month",
             value: current,
             note: "Resets automatically on the 1st",
+          },
+        ]
+      : [
+          {
+            label: "All respondents",
+            value: String(rows.length),
+            note: "Current and previous months",
+          },
+          {
+            label: "Latest response",
+            value: latest?.completedLabel || "—",
+            note: "Most recent completion overall",
+          },
+          {
+            label: "This month",
+            value: String(monthPeople().length),
+            note: current,
           },
         ];
 
@@ -213,15 +211,15 @@ function renderKpis(rows) {
 
 function renderPeople(rows) {
   const empty =
-    state.tab === "previous"
-      ? "No previous respondents yet."
-      : `No completions in ${monthLabel()} yet.`;
+    state.tab === "current"
+      ? `No completions in ${monthLabel()} yet.`
+      : "No respondents in the form export yet.";
   if (!rows.length) {
     els.people.innerHTML = `<p class="empty">${escapeHtml(empty)}</p>`;
     return;
   }
 
-  const showMonth = state.tab === "previous";
+  const showMonth = state.tab === "all";
   els.people.innerHTML = `
     <table>
       <thead>
@@ -258,9 +256,9 @@ function renderByDay(rows) {
   const buckets = byDay(rows);
   if (!buckets.length) {
     const empty =
-      state.tab === "previous"
-        ? "No previous completion dates yet."
-        : `No completion dates in ${monthLabel()} yet.`;
+      state.tab === "current"
+        ? `No completion dates in ${monthLabel()} yet.`
+        : "No completion dates yet.";
     els.byDay.innerHTML = `<p class="empty">${escapeHtml(empty)}</p>`;
     return;
   }
@@ -283,9 +281,9 @@ function renderRecent(rows) {
   const top = rows.slice(0, 8);
   if (!top.length) {
     const empty =
-      state.tab === "previous"
-        ? "No previous responses yet."
-        : `No responses in ${monthLabel()} yet.`;
+      state.tab === "current"
+        ? `No responses in ${monthLabel()} yet.`
+        : "No responses yet.";
     els.recent.innerHTML = `<p class="empty">${escapeHtml(empty)}</p>`;
     return;
   }
