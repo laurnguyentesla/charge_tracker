@@ -21,12 +21,13 @@
       <div class="wrap">
         <div class="eyebrow">
           <span>Form completion board</span>
-          <span>Microsoft Forms</span>
+          <span id="period">This month</span>
         </div>
         <h1>Employee Spotlight</h1>
-        <p class="lede">
-          Newsletter questionnaire respondents. Anyone who submitted is marked
-          completed. Emails and written answers are stripped before this page is published.
+        <p class="lede" id="lede">
+          Newsletter questionnaire respondents for the current month. The board
+          resets on the first of each month. Emails and written answers are stripped
+          before this page is published.
         </p>
       </div>
     </header>
@@ -45,8 +46,9 @@
         <article class="panel full">
           <h2>Respondents</h2>
           <p class="caption">
-            Name and completion status. Newest submissions first. A New badge
-            appears until you have seen that response on this browser.
+            Name and completion status for <span class="month-name">this month</span>.
+            Newest submissions first. A New badge appears until you have seen that
+            response on this browser.
           </p>
           <div id="people"></div>
         </article>
@@ -55,12 +57,12 @@
       <section class="grid">
         <article class="panel">
           <h2>Completions by day</h2>
-          <p class="caption">Count of unique respondents by completion date.</p>
+          <p class="caption">Count of unique respondents by day in <span class="month-name">this month</span>.</p>
           <div class="bars" id="by-day"></div>
         </article>
         <article class="panel">
           <h2>Latest responses</h2>
-          <p class="caption">Most recent people to complete the form.</p>
+          <p class="caption">Most recent people to complete the form this month.</p>
           <div id="recent"></div>
         </article>
       </section>
