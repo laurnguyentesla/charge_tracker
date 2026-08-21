@@ -30,6 +30,8 @@ def parse_datetime(value: object) -> datetime:
         return value.replace(tzinfo=None)
     raw = str(value).strip()
     for fmt in (
+        "%m/%d/%y %H:%M:%S",
+        "%m/%d/%y %H:%M",
         "%m/%d/%Y %H:%M:%S",
         "%m/%d/%Y %H:%M",
         "%Y-%m-%d %H:%M:%S",
@@ -73,21 +75,25 @@ def is_usable(path: Path) -> bool:
 
 def find_source() -> Path | None:
     SOURCE_DIR.mkdir(parents=True, exist_ok=True)
-    downloads = sorted(
-        DOWNLOADS.glob("Employee Spotlight Questionnaire*.xlsx"),
-        key=lambda path: path.stat().st_mtime,
-        reverse=True,
-    )
+    downloads: list[Path] = []
+    for pattern in (
+        "Employee Spotlight Questionnaire*.csv",
+        "Employee Spotlight Questionnaire*.xlsx",
+    ):
+        downloads.extend(DOWNLOADS.glob(pattern))
     if downloads:
-        dest = SOURCE_DIR / "employee-spotlight.xlsx"
-        shutil.copy2(downloads[0], dest)
+        newest = max(downloads, key=lambda path: path.stat().st_mtime)
+        dest = SOURCE_DIR / f"employee-spotlight{newest.suffix.lower()}"
+        shutil.copy2(newest, dest)
         return dest
 
     named = (
         list(SOURCE_DIR.glob("*.xlsx"))
         + list(SOURCE_DIR.glob("*.csv"))
         + list(WORKSPACE.glob("*spotlight*.xlsx"))
+        + list(WORKSPACE.glob("*spotlight*.csv"))
         + list(WORKSPACE.glob("*newsletter*.xlsx"))
+        + list(WORKSPACE.glob("*newsletter*.csv"))
         + list(WORKSPACE.glob("*charge*.csv"))
         + list(WORKSPACE.glob("*Charge*.csv"))
     )
