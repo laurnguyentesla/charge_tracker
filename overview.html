@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Forms · Overview</title>
-    <meta name="description" content="Overview of Microsoft Forms completion boards." />
+    <title>Forms · Home</title>
+    <meta name="description" content="Home overview of newsletter form completion boards." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -13,64 +13,42 @@
     />
     <link rel="stylesheet" href="css/styles.css" />
   </head>
-  <body data-page="overview">
+  <body data-page="all">
     <div class="shell">
-      <aside class="sidebar">
-        <h1 class="sidebar-title">Forms</h1>
-        <p class="sidebar-updated" id="nav-updated">Last updated</p>
-        <p class="sidebar-kicker">All forms</p>
-        <nav class="site-nav" aria-label="Forms">
-          <a href="overview.html" aria-current="page">
-            <span>Overview</span>
-            <span class="nav-count" data-count="all"></span>
-          </a>
-          <a href="guild.html">
-            <span>Grow with Guild</span>
-            <span class="nav-count" data-count="guild"></span>
-          </a>
-          <a href="index.html">
-            <span>Spotlight</span>
-            <span class="nav-count" data-count="spotlight"></span>
-          </a>
-          <a href="pathways.html">
-            <span>Pathways to Success</span>
-            <span class="nav-count" data-count="pathways"></span>
-          </a>
-        </nav>
-      </aside>
+      <aside class="sidebar"></aside>
       <div class="content">
         <header>
           <div class="eyebrow">
-            <span>Forms</span>
-            <span id="overview-updated">Last updated</span>
+            <span id="home-kicker">Home</span>
+            <span id="nav-clock"></span>
           </div>
-          <h1>Overview</h1>
-          <p class="lede">
-            Response totals for the forms on this dashboard. Open a form in the
-            left nav to see names and completion status.
-          </p>
+          <h1>Executive overview</h1>
+          <p class="lede" id="home-lede">Newsletter form performance across all boards.</p>
         </header>
         <main>
-          <section class="kpis kpis-four">
-            <article class="kpi">
-              <span>All forms</span>
-              <strong id="overview-all">—</strong>
-              <em>Total submissions</em>
+          <section class="kpis" id="home-kpis"></section>
+          <section class="grid">
+            <article class="panel">
+              <h2>Responses by month</h2>
+              <p class="caption">Combined submissions from Guild, Spotlight, and Pathways.</p>
+              <div class="bars" id="home-trend"></div>
             </article>
-            <article class="kpi">
-              <span>Grow with Guild</span>
-              <strong id="overview-guild">—</strong>
-              <em>Open the Guild board</em>
+            <article class="panel">
+              <h2>Share by form</h2>
+              <p class="caption">How responses are split across the three boards.</p>
+              <div id="home-donut"></div>
             </article>
-            <article class="kpi">
-              <span>Spotlight</span>
-              <strong id="overview-spotlight">—</strong>
-              <em>Open the Spotlight board</em>
+          </section>
+          <section class="grid">
+            <article class="panel">
+              <h2>Form status</h2>
+              <p class="caption">This-month activity vs all-time completions.</p>
+              <div id="home-table"></div>
             </article>
-            <article class="kpi">
-              <span>Pathways to Success</span>
-              <strong id="overview-pathways">—</strong>
-              <em>Open the Pathways board</em>
+            <article class="panel">
+              <h2>Latest across boards</h2>
+              <p class="caption">Most recent people to submit any form.</p>
+              <div id="home-recent"></div>
             </article>
           </section>
         </main>
@@ -81,5 +59,6 @@
       </div>
     </div>
     <script src="js/nav.js"></script>
+    <script src="js/home.js"></script>
   </body>
 </html>

@@ -4,7 +4,7 @@ Public GitHub Pages boards for Microsoft Forms completion tracking.
 
 Live site: <https://laurnguyentesla.github.io/charge_tracker/>
 
-- [Overview](https://laurnguyentesla.github.io/charge_tracker/overview.html)
+- [Home](https://laurnguyentesla.github.io/charge_tracker/overview.html)
 - [Grow with Guild](https://laurnguyentesla.github.io/charge_tracker/guild.html)
 - [Employee Spotlight](https://laurnguyentesla.github.io/charge_tracker/)
 - [Pathways to Success](https://laurnguyentesla.github.io/charge_tracker/pathways.html)
