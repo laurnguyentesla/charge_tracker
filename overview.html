@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Forms · Overview</title>
+    <meta name="description" content="Overview of Microsoft Forms completion boards." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body data-page="overview">
+    <div class="shell">
+      <aside class="sidebar">
+        <h1 class="sidebar-title">Forms</h1>
+        <p class="sidebar-updated" id="nav-updated">Last updated</p>
+        <p class="sidebar-kicker">All forms</p>
+        <nav class="site-nav" aria-label="Forms">
+          <a href="overview.html" aria-current="page">
+            <span>Overview</span>
+            <span class="nav-count" data-count="all"></span>
+          </a>
+          <a href="guild.html">
+            <span>Grow with Guild</span>
+            <span class="nav-count" data-count="guild"></span>
+          </a>
+          <a href="index.html">
+            <span>Spotlight</span>
+            <span class="nav-count" data-count="spotlight"></span>
+          </a>
+        </nav>
+      </aside>
+      <div class="content">
+        <header>
+          <div class="eyebrow">
+            <span>Forms</span>
+            <span id="overview-updated">Last updated</span>
+          </div>
+          <h1>Overview</h1>
+          <p class="lede">
+            Response totals for the forms on this dashboard. Open a form in the
+            left nav to see names and completion status.
+          </p>
+        </header>
+        <main>
+          <section class="kpis">
+            <article class="kpi">
+              <span>All forms</span>
+              <strong id="overview-all">—</strong>
+              <em>Total submissions</em>
+            </article>
+            <article class="kpi">
+              <span>Grow with Guild</span>
+              <strong id="overview-guild">—</strong>
+              <em>Open the Guild board</em>
+            </article>
+            <article class="kpi">
+              <span>Spotlight</span>
+              <strong id="overview-spotlight">—</strong>
+              <em>Open the Spotlight board</em>
+            </article>
+          </section>
+        </main>
+        <footer>
+          Source: Microsoft Forms exports. This page is a data visualization of
+          form completion, not an official Tesla product.
+        </footer>
+      </div>
+    </div>
+    <script src="js/nav.js"></script>
+  </body>
+</html>

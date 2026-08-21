@@ -17,65 +17,81 @@
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body data-source="data/guild.json" data-page="guild">
-    <header>
-      <div class="wrap">
-        <div class="eyebrow">
-          <span>Form completion board</span>
-          <span id="period">This month</span>
-        </div>
-        <h1>Grow with Guild</h1>
-        <p class="lede" id="lede">
-          Guild program respondents from the form export. All lists every
-          submission; Current month shows only this month.
-        </p>
-        <nav class="site-nav" aria-label="Boards">
-          <a href="index.html">Employee Spotlight</a>
-          <a href="guild.html" aria-current="page">Grow with Guild</a>
+    <div class="shell">
+      <aside class="sidebar">
+        <h1 class="sidebar-title">Forms</h1>
+        <p class="sidebar-updated" id="nav-updated">Last updated</p>
+        <p class="sidebar-kicker">All forms</p>
+        <nav class="site-nav" aria-label="Forms">
+          <a href="overview.html">
+            <span>Overview</span>
+            <span class="nav-count" data-count="all"></span>
+          </a>
+          <a href="guild.html" aria-current="page">
+            <span>Grow with Guild</span>
+            <span class="nav-count" data-count="guild"></span>
+          </a>
+          <a href="index.html">
+            <span>Spotlight</span>
+            <span class="nav-count" data-count="spotlight"></span>
+          </a>
         </nav>
-      </div>
-    </header>
-
-    <main class="wrap">
-      <div class="controls">
-        <div class="pills tabs" id="view-tabs" role="tablist" aria-label="Respondent views"></div>
-        <label class="search">
-          <input id="search" type="search" placeholder="Search a respondent" />
-        </label>
-      </div>
-
-      <section class="kpis" id="kpis"></section>
-
-      <section class="grid">
-        <article class="panel full">
-          <h2 id="people-heading">All respondents</h2>
-          <p class="caption" id="people-caption">
-            Every current and previous respondent, newest first.
+      </aside>
+      <div class="content">
+        <header>
+          <div class="eyebrow">
+            <span>Form completion board</span>
+            <span id="period">This month</span>
+          </div>
+          <h1>Grow with Guild</h1>
+          <p class="lede" id="lede">
+            Guild program respondents from the form export. All lists every
+            submission; Current month shows only this month.
           </p>
-          <div id="people"></div>
-        </article>
-      </section>
+        </header>
 
-      <section class="grid">
-        <article class="panel">
-          <h2>Completions by day</h2>
-          <p class="caption" id="by-day-caption">Count of unique respondents by completion date.</p>
-          <div class="bars" id="by-day"></div>
-        </article>
-        <article class="panel">
-          <h2>Latest responses</h2>
-          <p class="caption" id="recent-caption">Most recent people to complete the form.</p>
-          <div id="recent"></div>
-        </article>
-      </section>
-    </main>
+        <main>
+          <div class="controls">
+            <div class="pills tabs" id="view-tabs" role="tablist" aria-label="Respondent views"></div>
+            <label class="search">
+              <input id="search" type="search" placeholder="Search a respondent" />
+            </label>
+          </div>
 
-    <footer>
-      <div class="wrap">
-        <div id="generated"></div>
-        Source: Grow with Guild questionnaire. This page is a data visualization
-        of form completion, not an official Tesla product.
+          <section class="kpis" id="kpis"></section>
+
+          <section class="grid">
+            <article class="panel full">
+              <h2 id="people-heading">All respondents</h2>
+              <p class="caption" id="people-caption">
+                Every current and previous respondent, newest first.
+              </p>
+              <div id="people"></div>
+            </article>
+          </section>
+
+          <section class="grid">
+            <article class="panel">
+              <h2>Completions by day</h2>
+              <p class="caption" id="by-day-caption">Count of unique respondents by completion date.</p>
+              <div class="bars" id="by-day"></div>
+            </article>
+            <article class="panel">
+              <h2>Latest responses</h2>
+              <p class="caption" id="recent-caption">Most recent people to complete the form.</p>
+              <div id="recent"></div>
+            </article>
+          </section>
+        </main>
+
+        <footer>
+          <div id="generated"></div>
+          Source: Grow with Guild questionnaire. This page is a data visualization
+          of form completion, not an official Tesla product.
+        </footer>
       </div>
-    </footer>
+    </div>
+    <script src="js/nav.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>
