@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "Charge tracker",
+    "subtitle": "Form completion board",
+    "generatedAt": "2026-08-21T21:21:39Z",
+    "source": "No Microsoft Forms CSV found",
+    "privacy": "Emails and file-upload links were removed before publishing.",
+    "note": "Drop a Forms export CSV into source/ or AI Workspace (*charge*.csv), then rerun this script."
+  },
+  "kpis": {
+    "completed": 0,
+    "latestAt": null,
+    "latestLabel": ""
+  },
+  "byDay": [],
+  "people": []
+}

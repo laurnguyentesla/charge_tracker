@@ -1,1 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Charge tracker · Completion board</title>
+    <meta
+      name="description"
+      content="Who has completed the Microsoft Forms charge tracker."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <div class="eyebrow">
+          <span>Form completion board</span>
+          <span>Microsoft Forms</span>
+        </div>
+        <h1>Charge tracker</h1>
+        <p class="lede">
+          Respondents from the charge tracker form. Anyone who submitted is marked
+          completed. Emails and file links are stripped before this page is published.
+        </p>
+      </div>
+    </header>
 
+    <main class="wrap">
+      <div class="controls">
+        <div class="pills" id="status-pills"></div>
+        <label class="search">
+          <input id="search" type="search" placeholder="Search a respondent" />
+        </label>
+      </div>
+
+      <section class="kpis" id="kpis"></section>
+
+      <section class="grid">
+        <article class="panel full">
+          <h2>Respondents</h2>
+          <p class="caption">
+            Name and completion status. Newest submissions first. A New badge
+            appears until you have seen that response on this browser.
+          </p>
+          <div id="people"></div>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <h2>Completions by day</h2>
+          <p class="caption">Count of unique respondents by completion date.</p>
+          <div class="bars" id="by-day"></div>
+        </article>
+        <article class="panel">
+          <h2>Latest responses</h2>
+          <p class="caption">Most recent people to complete the form.</p>
+          <div id="recent"></div>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div id="generated"></div>
+        Source: Microsoft Forms charge tracker. This page is a data visualization of
+        form completion, not an official Tesla product.
+      </div>
+    </footer>
+    <script src="js/app.js"></script>
+  </body>
+</html>

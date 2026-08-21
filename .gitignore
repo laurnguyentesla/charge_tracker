@@ -1,0 +1,11 @@
+.DS_Store
+Thumbs.db
+*.log
+.venv/
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+source/*.csv
+source/*.xlsx
+!source/.gitkeep
