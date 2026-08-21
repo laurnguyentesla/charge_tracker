@@ -31,17 +31,25 @@ function setCount(key, value) {
 
 async function fillNav() {
   try {
-    const [spotlight, guild] = await Promise.all([
+    const [spotlight, guild, pathways] = await Promise.all([
       loadJson("data/charges.json"),
       loadJson("data/guild.json"),
+      loadJson("data/pathways.json"),
     ]);
     const spotlightCount = spotlight.people?.length || 0;
     const guildCount = guild.people?.length || 0;
+    const pathwaysCount = pathways.people?.length || 0;
+    const allCount = spotlightCount + guildCount + pathwaysCount;
     setCount("spotlight", spotlightCount);
     setCount("guild", guildCount);
-    setCount("all", spotlightCount + guildCount);
+    setCount("pathways", pathwaysCount);
+    setCount("all", allCount);
 
-    const latest = [spotlight.meta?.generatedAt, guild.meta?.generatedAt]
+    const latest = [
+      spotlight.meta?.generatedAt,
+      guild.meta?.generatedAt,
+      pathways.meta?.generatedAt,
+    ]
       .filter(Boolean)
       .sort()
       .at(-1);
@@ -57,7 +65,7 @@ async function fillNav() {
     }
     const overviewAll = document.getElementById("overview-all");
     if (overviewAll) {
-      overviewAll.textContent = String(spotlightCount + guildCount);
+      overviewAll.textContent = String(allCount);
     }
     const overviewSpotlight = document.getElementById("overview-spotlight");
     if (overviewSpotlight) {
@@ -66,6 +74,10 @@ async function fillNav() {
     const overviewGuild = document.getElementById("overview-guild");
     if (overviewGuild) {
       overviewGuild.textContent = String(guildCount);
+    }
+    const overviewPathways = document.getElementById("overview-pathways");
+    if (overviewPathways) {
+      overviewPathways.textContent = String(pathwaysCount);
     }
   } catch (error) {
     const updated = document.getElementById("nav-updated");

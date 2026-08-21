@@ -30,7 +30,7 @@ DATASETS = [
         "source_label": "Employee Spotlight Questionnaire",
         "output": REPO / "data" / "charges.json",
         "copy_name": "employee-spotlight",
-        "match": lambda name: "spotlight" in name or "newsletter" in name,
+        "match": lambda name: "spotlight" in name,
         "extras": False,
     },
     {
@@ -42,6 +42,16 @@ DATASETS = [
         "copy_name": "grow-with-guild",
         "match": lambda name: "guild" in name and "spotlight" not in name,
         "extras": True,
+    },
+    {
+        "key": "pathways",
+        "title": "Pathways to Success",
+        "subtitle": "Newsletter questionnaire",
+        "source_label": "Pathways to Success - Newsletter",
+        "output": REPO / "data" / "pathways.json",
+        "copy_name": "pathways-to-success",
+        "match": lambda name: "pathways" in name,
+        "extras": False,
     },
 ]
 

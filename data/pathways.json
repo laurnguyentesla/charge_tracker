@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "title": "Pathways to Success",
+    "subtitle": "Newsletter questionnaire",
+    "generatedAt": "2026-08-21T22:57:01Z",
+    "source": "Pathways to Success - Newsletter",
+    "privacy": "Emails, written answers, and file links were removed before publishing.",
+    "note": "Anyone in the Forms export is marked as submitted. Duplicate names keep the latest response."
+  },
+  "kpis": {
+    "completed": 9,
+    "latestAt": "2026-08-04T09:39:47",
+    "latestLabel": "Aug 4, 2026 9:39 AM"
+  },
+  "byDay": [
+    {
+      "day": "2026-05-19",
+      "count": 1
+    },
+    {
+      "day": "2026-05-21",
+      "count": 1
+    },
+    {
+      "day": "2026-06-11",
+      "count": 2
+    },
+    {
+      "day": "2026-07-13",
+      "count": 2
+    },
+    {
+      "day": "2026-07-15",
+      "count": 1
+    },
+    {
+      "day": "2026-07-31",
+      "count": 1
+    },
+    {
+      "day": "2026-08-04",
+      "count": 1
+    }
+  ],
+  "people": [
+    {
+      "name": "Ruggeri Sanchez",
+      "completed": true,
+      "completedAt": "2026-08-04T09:39:47",
+      "completedLabel": "Aug 4, 2026 9:39 AM"
+    },
+    {
+      "name": "Craig Harvey",
+      "completed": true,
+      "completedAt": "2026-07-31T10:42:50",
+      "completedLabel": "Jul 31, 2026 10:42 AM"
+    },
+    {
+      "name": "Felicia Barnes",
+      "completed": true,
+      "completedAt": "2026-07-15T07:03:50",
+      "completedLabel": "Jul 15, 2026 7:03 AM"
+    },
+    {
+      "name": "Krutarth Mehta",
+      "completed": true,
+      "completedAt": "2026-07-13T22:38:20",
+      "completedLabel": "Jul 13, 2026 10:38 PM"
+    },
+    {
+      "name": "Eugene Winkler",
+      "completed": true,
+      "completedAt": "2026-07-13T13:02:32",
+      "completedLabel": "Jul 13, 2026 1:02 PM"
+    },
+    {
+      "name": "Ryan Smith",
+      "completed": true,
+      "completedAt": "2026-06-11T15:10:30",
+      "completedLabel": "Jun 11, 2026 3:10 PM"
+    },
+    {
+      "name": "Gustavo Garcia",
+      "completed": true,
+      "completedAt": "2026-06-11T14:48:30",
+      "completedLabel": "Jun 11, 2026 2:48 PM"
+    },
+    {
+      "name": "James Griswold",
+      "completed": true,
+      "completedAt": "2026-05-21T06:34:09",
+      "completedLabel": "May 21, 2026 6:34 AM"
+    },
+    {
+      "name": "Seth Ingwerson",
+      "completed": true,
+      "completedAt": "2026-05-19T07:37:46",
+      "completedLabel": "May 19, 2026 7:37 AM"
+    }
+  ]
+}

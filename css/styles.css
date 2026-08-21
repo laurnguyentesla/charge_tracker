@@ -204,6 +204,10 @@ button.pill[aria-selected="true"] {
   margin-bottom: 18px;
 }
 
+.kpis-four {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 .kpi {
   background: var(--bg-elevated);
   border: 1px solid var(--line);
@@ -406,6 +410,7 @@ footer {
   }
 
   .kpis,
+  .kpis-four,
   .grid {
     grid-template-columns: 1fr;
   }

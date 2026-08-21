@@ -19,6 +19,16 @@ const PAGE = document.body.dataset.page || "spotlight";
 const SOURCE = document.body.dataset.source || "data/charges.json";
 const IS_GUILD = PAGE === "guild";
 
+function formName() {
+  if (PAGE === "guild") {
+    return "Grow with Guild";
+  }
+  if (PAGE === "pathways") {
+    return "Pathways to Success";
+  }
+  return "Employee Spotlight";
+}
+
 function seenKey() {
   return `${PAGE}-seen-at-${monthKey()}`;
 }
@@ -144,9 +154,7 @@ function renderTabs() {
 function renderCopy() {
   const current = monthLabel();
   if (state.tab === "current") {
-    els.lede.textContent = IS_GUILD
-      ? `Grow with Guild submissions for ${current}. This tab resets on the first of each month.`
-      : `Newsletter questionnaire respondents for ${current}. This tab resets on the first of each month.`;
+    els.lede.textContent = `${formName()} respondents for ${current}. This tab resets on the first of each month.`;
     els.peopleHeading.textContent = "Current month";
     els.peopleCaption.textContent = `Name and completion status for ${current}. Newest submissions first.`;
     els.byDayCaption.textContent = `Count of unique respondents by day in ${current}.`;

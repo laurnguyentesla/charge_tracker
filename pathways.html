@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Employee Spotlight · Completion board</title>
+    <title>Pathways to Success · Completion board</title>
     <meta
       name="description"
-      content="Who has completed the Employee Spotlight newsletter questionnaire."
+      content="Who has submitted the Pathways to Success newsletter questionnaire."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
     />
     <link rel="stylesheet" href="css/styles.css" />
   </head>
-  <body data-source="data/charges.json" data-page="spotlight">
+  <body data-source="data/pathways.json" data-page="pathways">
     <div class="shell">
       <aside class="sidebar">
         <h1 class="sidebar-title">Forms</h1>
@@ -31,11 +31,11 @@
             <span>Grow with Guild</span>
             <span class="nav-count" data-count="guild"></span>
           </a>
-          <a href="index.html" aria-current="page">
+          <a href="index.html">
             <span>Spotlight</span>
             <span class="nav-count" data-count="spotlight"></span>
           </a>
-          <a href="pathways.html">
+          <a href="pathways.html" aria-current="page">
             <span>Pathways to Success</span>
             <span class="nav-count" data-count="pathways"></span>
           </a>
@@ -47,10 +47,10 @@
             <span>Form completion board</span>
             <span id="period">This month</span>
           </div>
-          <h1>Employee Spotlight</h1>
+          <h1>Pathways to Success</h1>
           <p class="lede" id="lede">
-            Newsletter questionnaire respondents from the form export. All lists
-            every completion; Current month shows only this month.
+            Pathways newsletter respondents from the form export. All lists every
+            completion; Current month shows only this month.
           </p>
         </header>
 
@@ -90,7 +90,7 @@
 
         <footer>
           <div id="generated"></div>
-          Source: Employee Spotlight newsletter questionnaire. This page is a data
+          Source: Pathways to Success newsletter questionnaire. This page is a data
           visualization of form completion, not an official Tesla product.
         </footer>
       </div>
