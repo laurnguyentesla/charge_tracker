@@ -1,38 +1,34 @@
-"""Sanitize a Microsoft Forms charge-tracker export for GitHub Pages.
+"""Sanitize a Microsoft Forms export for GitHub Pages.
 
 Anyone in the export is treated as completed. Emails, IDs, start times,
-and SharePoint / file-upload URLs are stripped before publishing.
-Duplicate names keep the latest completion time.
+questionnaire answers, and SharePoint / file-upload URLs are stripped
+before publishing. Duplicate names keep the latest completion time.
 """
 
 from __future__ import annotations
 
 import csv
 import json
-import re
+import shutil
 from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 WORKSPACE = REPO.parent
+DOWNLOADS = Path.home() / "Downloads"
 OUTPUT_JSON = REPO / "data" / "charges.json"
 SOURCE_DIR = REPO / "source"
 
-SKIP_EXACT = {
-    "id",
-    "start time",
-    "email",
-    "email address",
-}
-URL_RE = re.compile(r"https?://", re.IGNORECASE)
-EMAIL_RE = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
+SKIP_NAMES = {"step tracker"}
 
 
-def parse_datetime(value: str | None) -> datetime:
-    if not value:
+def parse_datetime(value: object) -> datetime:
+    if value is None or value == "":
         return datetime.min
-    raw = value.strip()
+    if isinstance(value, datetime):
+        return value.replace(tzinfo=None)
+    raw = str(value).strip()
     for fmt in (
         "%m/%d/%Y %H:%M:%S",
         "%m/%d/%Y %H:%M",
@@ -47,45 +43,55 @@ def parse_datetime(value: str | None) -> datetime:
     return datetime.min
 
 
-def isoformat(value: datetime) -> str | None:
-    if value is datetime.min:
+def isoformat(value: datetime | None) -> str | None:
+    if value is None or value is datetime.min:
         return None
     return value.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-def display_time(value: datetime) -> str:
-    if value is datetime.min:
+def display_time(value: datetime | None) -> str:
+    if value is None or value is datetime.min:
         return ""
     hour = value.strftime("%I").lstrip("0") or "0"
     return f"{value.strftime('%b')} {value.day}, {value.year} {hour}:{value.strftime('%M %p')}"
 
 
-def is_pii_column(name: str) -> bool:
-    lowered = name.strip().casefold()
-    if lowered in SKIP_EXACT:
-        return True
-    if "email" in lowered:
-        return True
-    if "upload" in lowered or "screenshot" in lowered or "file" in lowered:
-        return True
-    return False
+def cell_text(value: object) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, datetime):
+        return value.strftime("%m/%d/%Y %H:%M:%S")
+    return str(value).replace("\xa0", " ").strip()
 
 
-def looks_like_pii_value(value: str) -> bool:
-    return bool(URL_RE.search(value) or EMAIL_RE.search(value))
+def is_usable(path: Path) -> bool:
+    if not path.is_file():
+        return False
+    lowered = path.name.casefold()
+    return not any(skip in lowered for skip in SKIP_NAMES)
 
 
-def find_source_csv() -> Path | None:
+def find_source() -> Path | None:
+    SOURCE_DIR.mkdir(parents=True, exist_ok=True)
+    downloads = sorted(
+        DOWNLOADS.glob("Employee Spotlight Questionnaire*.xlsx"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    if downloads:
+        dest = SOURCE_DIR / "employee-spotlight.xlsx"
+        shutil.copy2(downloads[0], dest)
+        return dest
+
     named = (
-        list(SOURCE_DIR.glob("*.csv"))
+        list(SOURCE_DIR.glob("*.xlsx"))
+        + list(SOURCE_DIR.glob("*.csv"))
+        + list(WORKSPACE.glob("*spotlight*.xlsx"))
+        + list(WORKSPACE.glob("*newsletter*.xlsx"))
         + list(WORKSPACE.glob("*charge*.csv"))
         + list(WORKSPACE.glob("*Charge*.csv"))
     )
-    usable = [
-        path
-        for path in named
-        if path.is_file() and "step tracker" not in path.name.casefold()
-    ]
+    usable = [path for path in named if is_usable(path)]
     if usable:
         return max(usable, key=lambda path: path.stat().st_mtime)
     return None
@@ -101,43 +107,49 @@ def read_csv(path: Path) -> list[dict[str, str]]:
             continue
     if text is None:
         raise UnicodeDecodeError("utf-8", b"", 0, 1, f"Could not decode {path}")
-    return list(csv.DictReader(StringIO(text)))
+    return [{key: cell_text(value) for key, value in row.items()} for row in csv.DictReader(StringIO(text))]
 
 
-def pick_name(row: dict[str, str]) -> str:
-    for key in row:
-        if key.strip().casefold() == "name":
-            return (row.get(key) or "").strip()
+def read_xlsx(path: Path) -> list[dict[str, str]]:
+    from openpyxl import load_workbook
+
+    workbook = load_workbook(path, data_only=True)
+    sheet = workbook.active
+    rows = list(sheet.iter_rows(values_only=True))
+    if not rows:
+        return []
+    headers = [cell_text(value) or f"column_{index}" for index, value in enumerate(rows[0])]
+    records: list[dict[str, str]] = []
+    for row in rows[1:]:
+        record = {}
+        for index, header in enumerate(headers):
+            record[header] = cell_text(row[index] if index < len(row) else None)
+        records.append(record)
+    return records
+
+
+def read_rows(path: Path) -> list[dict[str, str]]:
+    if path.suffix.casefold() in {".xlsx", ".xlsm"}:
+        return read_xlsx(path)
+    return read_csv(path)
+
+
+def pick_field(row: dict[str, str], *names: str) -> str:
+    wanted = {name.casefold() for name in names}
+    for key, value in row.items():
+        if key.strip().casefold() in wanted:
+            return (value or "").strip()
     return ""
-
-
-def pick_completed_at(row: dict[str, str]) -> str:
-    for key in row:
-        if key.strip().casefold() == "completion time":
-            return (row.get(key) or "").strip()
-    return ""
-
-
-def extra_answers(row: dict[str, str]) -> dict[str, str]:
-    answers: dict[str, str] = {}
-    for key, raw in row.items():
-        if not key or is_pii_column(key) or key.strip().casefold() in {"name", "completion time"}:
-            continue
-        value = (raw or "").strip()
-        if not value or looks_like_pii_value(value):
-            continue
-        answers[key.strip()] = value
-    return answers
 
 
 def empty_payload(source: str, note: str) -> dict:
     return {
         "meta": {
-            "title": "Charge tracker",
-            "subtitle": "Form completion board",
+            "title": "Employee Spotlight",
+            "subtitle": "Newsletter questionnaire",
             "generatedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "source": source,
-            "privacy": "Emails and file-upload links were removed before publishing.",
+            "privacy": "Emails and written answers were removed before publishing.",
             "note": note,
         },
         "kpis": {
@@ -151,30 +163,28 @@ def empty_payload(source: str, note: str) -> dict:
 
 
 def main() -> None:
-    source = find_source_csv()
+    source = find_source()
     if source is None:
         payload = empty_payload(
-            "No Microsoft Forms CSV found",
-            "Drop a Forms export CSV into source/ or AI Workspace (*charge*.csv), then rerun this script.",
+            "No Microsoft Forms export found",
+            "Drop the Forms Excel/CSV into source/ or Downloads, then rerun this script.",
         )
         OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
         OUTPUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-        print(f"No CSV found. Wrote empty board to {OUTPUT_JSON}")
+        print(f"No export found. Wrote empty board to {OUTPUT_JSON}")
         return
 
     best: dict[str, dict] = {}
-    for row in read_csv(source):
-        name = pick_name(row)
+    for row in read_rows(source):
+        name = pick_field(row, "name")
         if not name:
             continue
-        completed_at_raw = pick_completed_at(row)
-        completed_at = parse_datetime(completed_at_raw)
+        completed_at = parse_datetime(pick_field(row, "completion time"))
         record = {
             "name": name,
             "completed": True,
             "completedAt": isoformat(completed_at),
             "completedLabel": display_time(completed_at),
-            "answers": extra_answers(row),
         }
         key = name.casefold()
         previous = best.get(key)
@@ -205,18 +215,13 @@ def main() -> None:
         if latest is None or stamp > latest:
             latest = stamp
 
-    by_day = [
-        {"day": day, "count": day_counts[day]}
-        for day in sorted(day_counts)
-    ]
-
     payload = {
         "meta": {
-            "title": "Charge tracker",
-            "subtitle": "Form completion board",
+            "title": "Employee Spotlight",
+            "subtitle": "Newsletter questionnaire",
             "generatedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "source": source.name,
-            "privacy": "Emails and file-upload links were removed before publishing.",
+            "source": "Employee Spotlight Questionnaire",
+            "privacy": "Emails and written answers were removed before publishing.",
             "note": "Anyone in the Forms export is marked completed. Duplicate names keep the latest response.",
         },
         "kpis": {
@@ -224,7 +229,7 @@ def main() -> None:
             "latestAt": isoformat(latest) if latest else None,
             "latestLabel": display_time(latest) if latest else "",
         },
-        "byDay": by_day,
+        "byDay": [{"day": day, "count": day_counts[day]} for day in sorted(day_counts)],
         "people": people,
     }
 
@@ -232,6 +237,8 @@ def main() -> None:
     OUTPUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     print(f"Wrote {OUTPUT_JSON}")
     print(f"{len(people)} completed from {source.name}")
+    for person in people:
+        print(f"  {person['name']} — completed {person['completedLabel']}")
 
 
 if __name__ == "__main__":

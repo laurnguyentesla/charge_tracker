@@ -1,17 +1,75 @@
 {
   "meta": {
-    "title": "Charge tracker",
-    "subtitle": "Form completion board",
-    "generatedAt": "2026-08-21T21:21:39Z",
-    "source": "No Microsoft Forms CSV found",
-    "privacy": "Emails and file-upload links were removed before publishing.",
-    "note": "Drop a Forms export CSV into source/ or AI Workspace (*charge*.csv), then rerun this script."
+    "title": "Employee Spotlight",
+    "subtitle": "Newsletter questionnaire",
+    "generatedAt": "2026-08-21T21:27:06Z",
+    "source": "Employee Spotlight Questionnaire",
+    "privacy": "Emails and written answers were removed before publishing.",
+    "note": "Anyone in the Forms export is marked completed. Duplicate names keep the latest response."
   },
   "kpis": {
-    "completed": 0,
-    "latestAt": null,
-    "latestLabel": ""
+    "completed": 6,
+    "latestAt": "2026-08-12T11:14:22",
+    "latestLabel": "Aug 12, 2026 11:14 AM"
   },
-  "byDay": [],
-  "people": []
+  "byDay": [
+    {
+      "day": "2026-07-07",
+      "count": 1
+    },
+    {
+      "day": "2026-07-10",
+      "count": 1
+    },
+    {
+      "day": "2026-07-15",
+      "count": 1
+    },
+    {
+      "day": "2026-08-07",
+      "count": 1
+    },
+    {
+      "day": "2026-08-12",
+      "count": 2
+    }
+  ],
+  "people": [
+    {
+      "name": "La' Tonya Kindle",
+      "completed": true,
+      "completedAt": "2026-08-12T11:14:22",
+      "completedLabel": "Aug 12, 2026 11:14 AM"
+    },
+    {
+      "name": "Pablo Martin Jimenez",
+      "completed": true,
+      "completedAt": "2026-08-12T07:43:50",
+      "completedLabel": "Aug 12, 2026 7:43 AM"
+    },
+    {
+      "name": "Ken Coker",
+      "completed": true,
+      "completedAt": "2026-08-07T09:32:17",
+      "completedLabel": "Aug 7, 2026 9:32 AM"
+    },
+    {
+      "name": "Jorge Rubi",
+      "completed": true,
+      "completedAt": "2026-07-15T16:06:57",
+      "completedLabel": "Jul 15, 2026 4:06 PM"
+    },
+    {
+      "name": "Leena Naidu",
+      "completed": true,
+      "completedAt": "2026-07-10T14:04:49",
+      "completedLabel": "Jul 10, 2026 2:04 PM"
+    },
+    {
+      "name": "Oliver Santiago",
+      "completed": true,
+      "completedAt": "2026-07-07T13:33:31",
+      "completedLabel": "Jul 7, 2026 1:33 PM"
+    }
+  ]
 }
