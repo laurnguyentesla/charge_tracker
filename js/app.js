@@ -15,8 +15,12 @@ function labelForKey(key) {
   return monthLabel(new Date(year, month - 1, 1));
 }
 
+const PAGE = document.body.dataset.page || "spotlight";
+const SOURCE = document.body.dataset.source || "data/charges.json";
+const IS_GUILD = PAGE === "guild";
+
 function seenKey() {
-  return `charge-tracker-seen-at-${monthKey()}`;
+  return `${PAGE}-seen-at-${monthKey()}`;
 }
 
 const state = {
@@ -140,7 +144,9 @@ function renderTabs() {
 function renderCopy() {
   const current = monthLabel();
   if (state.tab === "current") {
-    els.lede.textContent = `Newsletter questionnaire respondents for ${current}. This tab resets on the first of each month.`;
+    els.lede.textContent = IS_GUILD
+      ? `Grow with Guild submissions for ${current}. This tab resets on the first of each month.`
+      : `Newsletter questionnaire respondents for ${current}. This tab resets on the first of each month.`;
     els.peopleHeading.textContent = "Current month";
     els.peopleCaption.textContent = `Name and completion status for ${current}. Newest submissions first.`;
     els.byDayCaption.textContent = `Count of unique respondents by day in ${current}.`;
@@ -220,12 +226,14 @@ function renderPeople(rows) {
   }
 
   const showMonth = state.tab === "all";
+  const showGuild = IS_GUILD;
   els.people.innerHTML = `
     <table>
       <thead>
         <tr>
           <th>Respondent</th>
           <th>Status</th>
+          ${showGuild ? "<th>Program</th><th>Guild status</th>" : ""}
           ${showMonth ? "<th>Month</th>" : ""}
           <th>Completed</th>
         </tr>
@@ -241,6 +249,11 @@ function renderPeople(rows) {
                 <td>
                   <span class="badge done">${person.completed ? "Completed" : "Not completed"}</span>
                 </td>
+                ${
+                  showGuild
+                    ? `<td>${escapeHtml(person.program || "—")}</td><td class="when">${escapeHtml(person.status || "Submitted")}</td>`
+                    : ""
+                }
                 ${showMonth ? `<td class="when">${escapeHtml(month)}</td>` : ""}
                 <td class="when">${escapeHtml(person.completedLabel || "—")}</td>
               </tr>
@@ -353,7 +366,7 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("pagehide", markSeen);
 
 async function init() {
-  const response = await fetch("data/charges.json");
+  const response = await fetch(SOURCE);
   state.data = await response.json();
   state.seenAt = localStorage.getItem(seenKey()) || "";
   render();
@@ -363,6 +376,6 @@ async function init() {
 init().catch((error) => {
   document.body.insertAdjacentHTML(
     "beforeend",
-    `<p class="wrap" style="color:#e4b15c">Could not load data/charges.json. ${escapeHtml(error.message)}</p>`,
+    `<p class="wrap" style="color:#e4b15c">Could not load ${escapeHtml(SOURCE)}. ${escapeHtml(error.message)}</p>`,
   );
 });

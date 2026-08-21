@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "title": "Grow with Guild",
+    "subtitle": "Guild program stories",
+    "generatedAt": "2026-08-21T22:28:52Z",
+    "source": "Grow with Guild",
+    "privacy": "Emails, written answers, and file links were removed before publishing.",
+    "note": "Anyone in the Forms export is marked as submitted. Duplicate names keep the latest response."
+  },
+  "kpis": {
+    "completed": 4,
+    "latestAt": "2026-07-19T12:35:32",
+    "latestLabel": "Jul 19, 2026 12:35 PM"
+  },
+  "byDay": [
+    {
+      "day": "2025-12-04",
+      "count": 1
+    },
+    {
+      "day": "2026-05-08",
+      "count": 1
+    },
+    {
+      "day": "2026-06-05",
+      "count": 1
+    },
+    {
+      "day": "2026-07-19",
+      "count": 1
+    }
+  ],
+  "people": [
+    {
+      "name": "Gerald Blue",
+      "completed": true,
+      "completedAt": "2026-07-19T12:35:32",
+      "completedLabel": "Jul 19, 2026 12:35 PM",
+      "program": "BS in Computer Science",
+      "status": "Active Participant"
+    },
+    {
+      "name": "Alixandra Macgregor",
+      "completed": true,
+      "completedAt": "2026-06-05T12:27:26",
+      "completedLabel": "Jun 5, 2026 12:27 PM",
+      "program": "Leadership Essentials Certificate",
+      "status": "Completed the Program"
+    },
+    {
+      "name": "Edgar Gonzalez",
+      "completed": true,
+      "completedAt": "2026-05-08T07:39:29",
+      "completedLabel": "May 8, 2026 7:39 AM",
+      "program": "Business Administration Associates Associates Degree",
+      "status": "Completed the Program"
+    },
+    {
+      "name": "Long Vy",
+      "completed": true,
+      "completedAt": "2025-12-04T11:18:34",
+      "completedLabel": "Dec 4, 2025 11:18 AM",
+      "program": "Bachelor's of Science in Analytics and Software Development"
+    }
+  ]
+}

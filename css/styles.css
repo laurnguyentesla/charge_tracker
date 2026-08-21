@@ -69,6 +69,28 @@ h1 {
   line-height: 1.5;
 }
 
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
+}
+
+.site-nav a {
+  text-decoration: none;
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.site-nav a[aria-current="page"] {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .controls {
   display: flex;
   flex-wrap: wrap;

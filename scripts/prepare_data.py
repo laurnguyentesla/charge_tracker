@@ -1,8 +1,8 @@
-"""Sanitize a Microsoft Forms export for GitHub Pages.
+"""Sanitize Microsoft Forms exports for GitHub Pages.
 
-Anyone in the export is treated as completed. Emails, IDs, start times,
-questionnaire answers, and SharePoint / file-upload URLs are stripped
-before publishing. Duplicate names keep the latest completion time.
+Anyone in an export is treated as having submitted. Emails, IDs, start
+times, written answers, links, and file-upload URLs are stripped before
+publishing. Duplicate names keep the latest completion time.
 """
 
 from __future__ import annotations
@@ -17,10 +17,33 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 WORKSPACE = REPO.parent
 DOWNLOADS = Path.home() / "Downloads"
-OUTPUT_JSON = REPO / "data" / "charges.json"
 SOURCE_DIR = REPO / "source"
 
 SKIP_NAMES = {"step tracker"}
+SKIP_EXT = {".m4a", ".mp4", ".jpg", ".jpeg", ".png", ".mov"}
+
+DATASETS = [
+    {
+        "key": "spotlight",
+        "title": "Employee Spotlight",
+        "subtitle": "Newsletter questionnaire",
+        "source_label": "Employee Spotlight Questionnaire",
+        "output": REPO / "data" / "charges.json",
+        "copy_name": "employee-spotlight",
+        "match": lambda name: "spotlight" in name or "newsletter" in name,
+        "extras": False,
+    },
+    {
+        "key": "guild",
+        "title": "Grow with Guild",
+        "subtitle": "Guild program stories",
+        "source_label": "Grow with Guild",
+        "output": REPO / "data" / "guild.json",
+        "copy_name": "grow-with-guild",
+        "match": lambda name: "guild" in name and "spotlight" not in name,
+        "extras": True,
+    },
+]
 
 
 def parse_datetime(value: object) -> datetime:
@@ -67,36 +90,34 @@ def cell_text(value: object) -> str:
 
 
 def is_usable(path: Path) -> bool:
-    if not path.is_file():
+    if not path.is_file() or path.suffix.casefold() in SKIP_EXT:
+        return False
+    if path.suffix.casefold() not in {".csv", ".xlsx", ".xlsm"}:
         return False
     lowered = path.name.casefold()
     return not any(skip in lowered for skip in SKIP_NAMES)
 
 
-def find_source() -> Path | None:
+def find_source(dataset: dict) -> Path | None:
     SOURCE_DIR.mkdir(parents=True, exist_ok=True)
-    downloads: list[Path] = []
-    for pattern in (
-        "Employee Spotlight Questionnaire*.csv",
-        "Employee Spotlight Questionnaire*.xlsx",
-    ):
-        downloads.extend(DOWNLOADS.glob(pattern))
+    match = dataset["match"]
+    downloads = [
+        path
+        for path in DOWNLOADS.iterdir()
+        if is_usable(path) and match(path.name.casefold())
+    ]
     if downloads:
-        newest = max(downloads, key=lambda path: path.stat().st_mtime)
-        dest = SOURCE_DIR / f"employee-spotlight{newest.suffix.lower()}"
+        csvs = [path for path in downloads if path.suffix.lower() == ".csv"]
+        newest = max(csvs or downloads, key=lambda path: path.stat().st_mtime)
+        dest = SOURCE_DIR / f"{dataset['copy_name']}{newest.suffix.lower()}"
         shutil.copy2(newest, dest)
         return dest
 
-    named = (
-        list(SOURCE_DIR.glob("*.xlsx"))
-        + list(SOURCE_DIR.glob("*.csv"))
-        + list(WORKSPACE.glob("*spotlight*.xlsx"))
-        + list(WORKSPACE.glob("*spotlight*.csv"))
-        + list(WORKSPACE.glob("*newsletter*.xlsx"))
-        + list(WORKSPACE.glob("*newsletter*.csv"))
-        + list(WORKSPACE.glob("*charge*.csv"))
-        + list(WORKSPACE.glob("*Charge*.csv"))
-    )
+    named = list(SOURCE_DIR.glob(f"{dataset['copy_name']}.*")) + [
+        path
+        for path in [*WORKSPACE.glob("*"), *SOURCE_DIR.glob("*")]
+        if is_usable(path) and match(path.name.casefold())
+    ]
     usable = [path for path in named if is_usable(path)]
     if usable:
         return max(usable, key=lambda path: path.stat().st_mtime)
@@ -148,14 +169,22 @@ def pick_field(row: dict[str, str], *names: str) -> str:
     return ""
 
 
-def empty_payload(source: str, note: str) -> dict:
+def pick_contains(row: dict[str, str], *needles: str) -> str:
+    for key, value in row.items():
+        lowered = key.casefold()
+        if all(needle in lowered for needle in needles):
+            return (value or "").strip()
+    return ""
+
+
+def empty_payload(dataset: dict, source: str, note: str) -> dict:
     return {
         "meta": {
-            "title": "Employee Spotlight",
-            "subtitle": "Newsletter questionnaire",
+            "title": dataset["title"],
+            "subtitle": dataset["subtitle"],
             "generatedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "source": source,
-            "privacy": "Emails and written answers were removed before publishing.",
+            "privacy": "Emails, written answers, and file links were removed before publishing.",
             "note": note,
         },
         "kpis": {
@@ -168,21 +197,10 @@ def empty_payload(source: str, note: str) -> dict:
     }
 
 
-def main() -> None:
-    source = find_source()
-    if source is None:
-        payload = empty_payload(
-            "No Microsoft Forms export found",
-            "Drop the Forms Excel/CSV into source/ or Downloads, then rerun this script.",
-        )
-        OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
-        OUTPUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-        print(f"No export found. Wrote empty board to {OUTPUT_JSON}")
-        return
-
+def build_people(rows: list[dict[str, str]], extras: bool) -> list[dict]:
     best: dict[str, dict] = {}
-    for row in read_rows(source):
-        name = pick_field(row, "name")
+    for row in rows:
+        name = pick_field(row, "name") or pick_contains(row, "what is your name")
         if not name:
             continue
         completed_at = parse_datetime(pick_field(row, "completion time"))
@@ -192,6 +210,13 @@ def main() -> None:
             "completedAt": isoformat(completed_at),
             "completedLabel": display_time(completed_at),
         }
+        if extras:
+            program = pick_contains(row, "guild program")
+            status = pick_contains(row, "participation status")
+            if program:
+                record["program"] = program
+            if status:
+                record["status"] = status
         key = name.casefold()
         previous = best.get(key)
         if previous is None:
@@ -204,12 +229,14 @@ def main() -> None:
         if completed_at >= prev_dt:
             best[key] = record
 
-    people = sorted(
+    return sorted(
         best.values(),
         key=lambda item: (item["completedAt"] or "", item["name"].casefold()),
         reverse=True,
     )
 
+
+def summarize(people: list[dict]) -> tuple[dict[str, int], datetime | None]:
     day_counts: dict[str, int] = {}
     latest: datetime | None = None
     for person in people:
@@ -220,15 +247,33 @@ def main() -> None:
         stamp = datetime.strptime(person["completedAt"], "%Y-%m-%dT%H:%M:%S")
         if latest is None or stamp > latest:
             latest = stamp
+    return day_counts, latest
 
+
+def write_dataset(dataset: dict) -> None:
+    source = find_source(dataset)
+    output = dataset["output"]
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if source is None:
+        payload = empty_payload(
+            dataset,
+            f"No {dataset['title']} export found",
+            "Drop the Forms Excel/CSV into source/ or Downloads, then rerun this script.",
+        )
+        output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        print(f"No export found for {dataset['title']}. Wrote empty board to {output}")
+        return
+
+    people = build_people(read_rows(source), dataset["extras"])
+    day_counts, latest = summarize(people)
     payload = {
         "meta": {
-            "title": "Employee Spotlight",
-            "subtitle": "Newsletter questionnaire",
+            "title": dataset["title"],
+            "subtitle": dataset["subtitle"],
             "generatedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "source": "Employee Spotlight Questionnaire",
-            "privacy": "Emails and written answers were removed before publishing.",
-            "note": "Anyone in the Forms export is marked completed. Duplicate names keep the latest response.",
+            "source": dataset["source_label"],
+            "privacy": "Emails, written answers, and file links were removed before publishing.",
+            "note": "Anyone in the Forms export is marked as submitted. Duplicate names keep the latest response.",
         },
         "kpis": {
             "completed": len(people),
@@ -238,13 +283,17 @@ def main() -> None:
         "byDay": [{"day": day, "count": day_counts[day]} for day in sorted(day_counts)],
         "people": people,
     }
-
-    OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    print(f"Wrote {OUTPUT_JSON}")
-    print(f"{len(people)} completed from {source.name}")
+    output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    print(f"Wrote {output}")
+    print(f"{len(people)} submitted from {source.name}")
     for person in people:
-        print(f"  {person['name']} — completed {person['completedLabel']}")
+        extra = f" — {person['status']}" if person.get("status") else ""
+        print(f"  {person['name']} — {person['completedLabel']}{extra}")
+
+
+def main() -> None:
+    for dataset in DATASETS:
+        write_dataset(dataset)
 
 
 if __name__ == "__main__":

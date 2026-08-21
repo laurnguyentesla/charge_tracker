@@ -2,10 +2,10 @@
   "meta": {
     "title": "Employee Spotlight",
     "subtitle": "Newsletter questionnaire",
-    "generatedAt": "2026-08-21T21:44:52Z",
+    "generatedAt": "2026-08-21T22:28:52Z",
     "source": "Employee Spotlight Questionnaire",
-    "privacy": "Emails and written answers were removed before publishing.",
-    "note": "Anyone in the Forms export is marked completed. Duplicate names keep the latest response."
+    "privacy": "Emails, written answers, and file links were removed before publishing.",
+    "note": "Anyone in the Forms export is marked as submitted. Duplicate names keep the latest response."
   },
   "kpis": {
     "completed": 6,
