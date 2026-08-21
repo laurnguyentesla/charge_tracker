@@ -25,16 +25,15 @@
         </div>
         <h1>Employee Spotlight</h1>
         <p class="lede" id="lede">
-          Newsletter questionnaire respondents for the current month. The board
-          resets on the first of each month. Emails and written answers are stripped
-          before this page is published.
+          Newsletter questionnaire respondents. Use Current month for this month’s
+          completions, or Previous respondents for everyone from earlier months.
         </p>
       </div>
     </header>
 
     <main class="wrap">
       <div class="controls">
-        <div class="pills" id="status-pills"></div>
+        <div class="pills tabs" id="view-tabs" role="tablist" aria-label="Respondent views"></div>
         <label class="search">
           <input id="search" type="search" placeholder="Search a respondent" />
         </label>
@@ -44,11 +43,9 @@
 
       <section class="grid">
         <article class="panel full">
-          <h2>Respondents</h2>
-          <p class="caption">
-            Name and completion status for <span class="month-name">this month</span>.
-            Newest submissions first. A New badge appears until you have seen that
-            response on this browser.
+          <h2 id="people-heading">Respondents</h2>
+          <p class="caption" id="people-caption">
+            Name and completion status for this month. Newest submissions first.
           </p>
           <div id="people"></div>
         </article>
@@ -57,12 +54,12 @@
       <section class="grid">
         <article class="panel">
           <h2>Completions by day</h2>
-          <p class="caption">Count of unique respondents by day in <span class="month-name">this month</span>.</p>
+          <p class="caption" id="by-day-caption">Count of unique respondents by day in this month.</p>
           <div class="bars" id="by-day"></div>
         </article>
         <article class="panel">
           <h2>Latest responses</h2>
-          <p class="caption">Most recent people to complete the form this month.</p>
+          <p class="caption" id="recent-caption">Most recent people to complete the form this month.</p>
           <div id="recent"></div>
         </article>
       </section>

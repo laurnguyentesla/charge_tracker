@@ -95,7 +95,8 @@ button.pill {
   cursor: pointer;
 }
 
-button.pill[aria-pressed="true"] {
+button.pill[aria-pressed="true"],
+button.pill[aria-selected="true"] {
   background: var(--accent-dim);
   border-color: var(--accent);
   color: var(--accent);

@@ -10,6 +10,11 @@ function monthLabel(date = now()) {
   return date.toLocaleString("en-US", { month: "long", year: "numeric" });
 }
 
+function labelForKey(key) {
+  const [year, month] = key.split("-").map(Number);
+  return monthLabel(new Date(year, month - 1, 1));
+}
+
 function seenKey() {
   return `charge-tracker-seen-at-${monthKey()}`;
 }
@@ -17,7 +22,7 @@ function seenKey() {
 const state = {
   data: null,
   query: "",
-  filter: "all",
+  tab: "current",
   monthKey: monthKey(),
   seenAt: "",
 };
@@ -25,11 +30,15 @@ const state = {
 const els = {
   period: document.getElementById("period"),
   lede: document.getElementById("lede"),
-  pills: document.getElementById("status-pills"),
+  tabs: document.getElementById("view-tabs"),
   search: document.getElementById("search"),
   kpis: document.getElementById("kpis"),
+  peopleHeading: document.getElementById("people-heading"),
+  peopleCaption: document.getElementById("people-caption"),
   people: document.getElementById("people"),
+  byDayCaption: document.getElementById("by-day-caption"),
   byDay: document.getElementById("by-day"),
+  recentCaption: document.getElementById("recent-caption"),
   recent: document.getElementById("recent"),
   generated: document.getElementById("generated"),
 };
@@ -50,8 +59,16 @@ function monthPeople() {
   return (state.data.people || []).filter(inCurrentMonth);
 }
 
+function previousPeople() {
+  return (state.data.people || []).filter((person) => !inCurrentMonth(person));
+}
+
+function activePeople() {
+  return state.tab === "previous" ? previousPeople() : monthPeople();
+}
+
 function isNew(person) {
-  if (!person.completedAt) {
+  if (state.tab !== "current" || !person.completedAt) {
     return false;
   }
   if (!state.seenAt) {
@@ -62,14 +79,10 @@ function isNew(person) {
 
 function filteredPeople() {
   const query = state.query.trim().toLowerCase();
-  return monthPeople().filter((person) => {
-    const nameOk = !query || person.name.toLowerCase().includes(query);
-    const statusOk = state.filter === "all" || (state.filter === "completed" && person.completed);
-    return nameOk && statusOk;
-  });
+  return activePeople().filter((person) => !query || person.name.toLowerCase().includes(query));
 }
 
-function latestInMonth(rows) {
+function latestIn(rows) {
   return rows.reduce((best, person) => {
     if (!person.completedAt) {
       return best;
@@ -100,54 +113,90 @@ function renderPeriod() {
   if (els.period) {
     els.period.textContent = label;
   }
-  if (els.lede) {
-    els.lede.textContent = `Newsletter questionnaire respondents for ${label}. The board resets on the first of each month. Emails and written answers are stripped before this page is published.`;
-  }
-  document.querySelectorAll(".month-name").forEach((node) => {
-    node.textContent = label;
-  });
 }
 
-function renderPills(rows) {
-  const total = rows.length;
+function renderTabs() {
+  const currentCount = monthPeople().length;
+  const previousCount = previousPeople().length;
   const options = [
-    { id: "all", label: `All · ${total}` },
-    { id: "completed", label: `Completed · ${total}` },
+    { id: "current", label: `Current month · ${currentCount}` },
+    { id: "previous", label: `Previous respondents · ${previousCount}` },
   ];
-  els.pills.innerHTML = "";
+  els.tabs.innerHTML = "";
   options.forEach((option) => {
     const button = document.createElement("button");
     button.className = "pill";
     button.type = "button";
+    button.id = `tab-${option.id}`;
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-selected", String(option.id === state.tab));
     button.textContent = option.label;
-    button.setAttribute("aria-pressed", String(option.id === state.filter));
     button.addEventListener("click", () => {
-      state.filter = option.id;
+      state.tab = option.id;
       render();
     });
-    els.pills.appendChild(button);
+    els.tabs.appendChild(button);
   });
 }
 
+function renderCopy() {
+  const current = monthLabel();
+  if (state.tab === "previous") {
+    els.lede.textContent = `Everyone who completed the questionnaire before ${current}. Current-month responses stay on the Current month tab.`;
+    els.peopleHeading.textContent = "Previous respondents";
+    els.peopleCaption.textContent = "People who completed in earlier months, newest first.";
+    els.byDayCaption.textContent = "Completions by day before this month.";
+    els.recentCaption.textContent = "Most recent people from previous months.";
+    els.generated.textContent = `Previous months. ${state.data.meta.privacy}`;
+    return;
+  }
+  els.lede.textContent = `Newsletter questionnaire respondents for ${current}. This tab resets on the first of each month.`;
+  els.peopleHeading.textContent = "Current month";
+  els.peopleCaption.textContent = `Name and completion status for ${current}. Newest submissions first.`;
+  els.byDayCaption.textContent = `Count of unique respondents by day in ${current}.`;
+  els.recentCaption.textContent = `Most recent people to complete the form in ${current}.`;
+  els.generated.textContent = `Showing ${current}. ${state.data.meta.privacy}`;
+}
+
 function renderKpis(rows) {
-  const latest = latestInMonth(rows);
-  const cards = [
-    {
-      label: "Completed",
-      value: String(rows.filter((row) => row.completed).length),
-      note: `Unique respondents in ${monthLabel()}`,
-    },
-    {
-      label: "Latest response",
-      value: latest?.completedLabel || "—",
-      note: "Most recent completion this month",
-    },
-    {
-      label: "Month",
-      value: monthLabel(),
-      note: "Resets automatically on the 1st",
-    },
-  ];
+  const latest = latestIn(rows);
+  const current = monthLabel();
+  const cards =
+    state.tab === "previous"
+      ? [
+          {
+            label: "Previous respondents",
+            value: String(rows.length),
+            note: `Completed before ${current}`,
+          },
+          {
+            label: "Latest previous",
+            value: latest?.completedLabel || "—",
+            note: "Most recent completion before this month",
+          },
+          {
+            label: "Current month",
+            value: current,
+            note: `${monthPeople().length} on the Current month tab`,
+          },
+        ]
+      : [
+          {
+            label: "Completed",
+            value: String(rows.filter((row) => row.completed).length),
+            note: `Unique respondents in ${current}`,
+          },
+          {
+            label: "Latest response",
+            value: latest?.completedLabel || "—",
+            note: "Most recent completion this month",
+          },
+          {
+            label: "Month",
+            value: current,
+            note: "Resets automatically on the 1st",
+          },
+        ];
 
   els.kpis.innerHTML = cards
     .map(
@@ -163,32 +212,38 @@ function renderKpis(rows) {
 }
 
 function renderPeople(rows) {
+  const empty =
+    state.tab === "previous"
+      ? "No previous respondents yet."
+      : `No completions in ${monthLabel()} yet.`;
   if (!rows.length) {
-    els.people.innerHTML = `<p class="empty">No completions in ${escapeHtml(monthLabel())} yet.</p>`;
+    els.people.innerHTML = `<p class="empty">${escapeHtml(empty)}</p>`;
     return;
   }
 
+  const showMonth = state.tab === "previous";
   els.people.innerHTML = `
     <table>
       <thead>
         <tr>
           <th>Respondent</th>
           <th>Status</th>
+          ${showMonth ? "<th>Month</th>" : ""}
           <th>Completed</th>
         </tr>
       </thead>
       <tbody>
         ${rows
           .map((person) => {
-            const fresh = isNew(person)
-              ? `<span class="badge new">New</span>`
-              : "";
+            const fresh = isNew(person) ? `<span class="badge new">New</span>` : "";
+            const month = person.completedAt ? labelForKey(person.completedAt.slice(0, 7)) : "—";
             return `
               <tr>
                 <td class="name">${escapeHtml(person.name)}${fresh}</td>
                 <td>
                   <span class="badge done">${person.completed ? "Completed" : "Not completed"}</span>
                 </td>
+                ${showMonth ? `<td class="when">${escapeHtml(month)}</td>` : ""}
                 <td class="when">${escapeHtml(person.completedLabel || "—")}</td>
               </tr>
             `;
@@ -202,7 +257,11 @@ function renderPeople(rows) {
 function renderByDay(rows) {
   const buckets = byDay(rows);
   if (!buckets.length) {
-    els.byDay.innerHTML = `<p class="empty">No completion dates in ${escapeHtml(monthLabel())} yet.</p>`;
+    const empty =
+      state.tab === "previous"
+        ? "No previous completion dates yet."
+        : `No completion dates in ${monthLabel()} yet.`;
+    els.byDay.innerHTML = `<p class="empty">${escapeHtml(empty)}</p>`;
     return;
   }
   const max = Math.max(...buckets.map((item) => item.count), 1);
@@ -223,7 +282,11 @@ function renderByDay(rows) {
 function renderRecent(rows) {
   const top = rows.slice(0, 8);
   if (!top.length) {
-    els.recent.innerHTML = `<p class="empty">No responses in ${escapeHtml(monthLabel())} yet.</p>`;
+    const empty =
+      state.tab === "previous"
+        ? "No previous responses yet."
+        : `No responses in ${monthLabel()} yet.`;
+    els.recent.innerHTML = `<p class="empty">${escapeHtml(empty)}</p>`;
     return;
   }
   els.recent.innerHTML = top
@@ -240,7 +303,7 @@ function renderRecent(rows) {
 }
 
 function markSeen() {
-  const latest = latestInMonth(monthPeople());
+  const latest = latestIn(monthPeople());
   if (latest?.completedAt) {
     localStorage.setItem(seenKey(), latest.completedAt);
   }
@@ -252,14 +315,15 @@ function render() {
     state.monthKey = current;
     state.seenAt = localStorage.getItem(seenKey()) || "";
   }
-  const monthRows = monthPeople();
   const rows = filteredPeople();
+  const tabRows = activePeople();
   renderPeriod();
-  renderPills(monthRows);
-  renderKpis(rows);
+  renderTabs();
+  renderCopy();
+  renderKpis(tabRows);
   renderPeople(rows);
-  renderByDay(monthRows);
-  renderRecent(monthRows);
+  renderByDay(tabRows);
+  renderRecent(tabRows);
 }
 
 function msUntilNextMonth() {
@@ -294,7 +358,6 @@ async function init() {
   const response = await fetch("data/charges.json");
   state.data = await response.json();
   state.seenAt = localStorage.getItem(seenKey()) || "";
-  els.generated.textContent = `Showing ${monthLabel()} only. ${state.data.meta.privacy}`;
   render();
   scheduleMonthRefresh();
 }
